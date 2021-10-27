@@ -14,6 +14,7 @@ from autograd.numpy.linalg import (  # NOQA
     norm,
     solve,
     svd,
+    solve,
 )
 
 from .common import to_ndarray
