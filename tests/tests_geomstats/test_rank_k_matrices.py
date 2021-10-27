@@ -5,6 +5,7 @@ import tests.helper as helper
 import geomstats.backend as gs
 import geomstats.tests
 from geomstats.geometry.rank_k_matrices import RankKMatrices
+from geomstats.geometry.full_rank_matrices import FullRankMatrices
 
 
 class TestRankKMatrices(geomstats.tests.TestCase):
@@ -56,10 +57,10 @@ class TestRankKMatrices(geomstats.tests.TestCase):
 
     def test_projection_and_belongs(self):
         """Test of projection method."""
-        shape = (2, self.m, self.n)
-        result = helper.test_projection_and_belongs(self.space, shape)
-        for res in result:
-            self.assertTrue(res)
+        point = FullRankMatrices(self.m,self.n).random_point(1)
+        p_point = self.space.projection(point)
+        result=self.space.belongs(p_point)
+        self.assertTrue(result)
 
     def test_random_and_belongs(self):
         """Test of random point sampling method."""
