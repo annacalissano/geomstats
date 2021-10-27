@@ -105,6 +105,7 @@ class RankKMatrices(Manifold):
             return sample[0]
         else:
             return sample
+
     # ANNA this function is missing - check next week
     def is_tangent(self, vector, base_point):
         """Check if the vector belongs to the tangent space at the input point.
@@ -156,8 +157,12 @@ class RankKMatrices(Manifold):
             return vector
         else:
             u_full, s, v_full = gs.linalg.svd(base_point)
-            u = u_full[:, 0:self.rank]
-            v = v_full[0:self.rank, :]
-            pu=gs.matmul(u,u.transpose())
-            pv=gs.matmul(v.transpose(), v)
-            return gs.matmul(gs.matmul(pu,vector),pv)+gs.matmul(gs.matmul((gs.eye(pu.shape)-pu), vector),pv)+ gs.matmul(pu,gs.matmul(vector,gs.eye(pu.shape)-pv))
+            u = u_full[:, 0 : self.rank]
+            v = v_full[0 : self.rank, :]
+            pu = gs.matmul(u, u.transpose())
+            pv = gs.matmul(v.transpose(), v)
+            return (
+                gs.matmul(gs.matmul(pu, vector), pv)
+                + gs.matmul(gs.matmul((gs.eye(pu.shape) - pu), vector), pv)
+                + gs.matmul(pu, gs.matmul(vector, gs.eye(pu.shape) - pv))
+            )
