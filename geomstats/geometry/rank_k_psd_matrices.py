@@ -94,8 +94,6 @@ class RankKPSDMatrices(Manifold):
         regularized[0 : (self.n - self.rank)] = [0] * (self.n - self.rank)
         reconstruction = gs.einsum("...ij,...j->...ij", eigvecs, regularized)
         return Matrices.mul(reconstruction, Matrices.transpose(eigvecs))
-        # ANNA - how can we handle this case?
-        # the rank is lower because there are more than n-k zeros eigenvalues
 
     def random_point(self, n_samples=1, bound=1.0):
         """Sample in PSD(n,k) from the log-uniform distribution of SPD matrices
@@ -152,7 +150,6 @@ class RankKPSDMatrices(Manifold):
         vector_sym = [
             vector if self.sym.belongs(vector) else self.sym.projection(vector)
         ][0]
-        # check if symmetric
         r, delta, rt = gs.linalg.svd(base_point)
         rort = r[:, self.n - self.rank : self.n]
         rort_t = rt[self.n - self.rank : self.n, :]
