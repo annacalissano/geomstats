@@ -80,7 +80,7 @@ class RankKMatrices(Manifold):
         if not belongs:
             u, s, vh = gs.linalg.svd(point, full_matrices=False)
             s[self.rank : min(self.shape)] = 0
-            smat = gs.eye(min(self.shape)) * s
+            smat = gs.eye(min(self.shape))*s
             return gs.dot(u, gs.dot(smat, vh))
         else:
             return point
