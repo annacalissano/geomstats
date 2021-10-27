@@ -57,9 +57,9 @@ class TestRankKMatrices(geomstats.tests.TestCase):
 
     def test_projection_and_belongs(self):
         """Test of projection method."""
-        point = FullRankMatrices(self.m,self.n).random_point(1)
+        point = FullRankMatrices(self.m, self.n).random_point(1)
         p_point = self.space.projection(point)
-        result=self.space.belongs(p_point)
+        result = self.space.belongs(p_point)
         self.assertTrue(result)
 
     def test_random_and_belongs(self):
