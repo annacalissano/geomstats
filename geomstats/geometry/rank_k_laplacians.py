@@ -15,6 +15,7 @@ from geomstats.geometry.spd_matrices import (
 )
 from geomstats.geometry.symmetric_matrices import SymmetricMatrices
 import numpy as np
+
 # ANNA add the function fill_diagonal to the gs
 
 
@@ -35,8 +36,6 @@ class RankKLaplacians(Manifold):
      The Annals of Applied Statistics, 725-750.
     """
 
-
-
     def __init__(
         self,
         n,
@@ -48,13 +47,14 @@ class RankKLaplacians(Manifold):
     ):
         super(Manifold, self).__init__(**kwargs)
         self.n = n
-        self.dim = (int(k*n - k * (k + 1) / 2))
+        self.dim = int(k * n - k * (k + 1) / 2)
         self.default_point_type = default_point_type
         self.default_coords_type = default_coords_type
         self.metric = metric
         self.rank = k
         self.sym = SymmetricMatrices(self.n)
-# ANNA - how do we create copies? on graphspace i was using copy.deepcopy()
+
+    # ANNA - how do we create copies? on graphspace i was using copy.deepcopy()
     def belongs(self, mat, atol=gs.atol):
         """Check if a matrix is a laplacian matrix
 
@@ -76,13 +76,18 @@ class RankKLaplacians(Manifold):
         is_semipositive = gs.all(eigval > -atol, axis=-1)
         is_rankk = gs.linalg.matrix_rank(mat) == self.rank
 
-        is_sumtozero=mat.sum(axis=0).sum() == 0
-        np.fill_diagonal(mat,0)
+        is_sumtozero = mat.sum(axis=0).sum() == 0
+        np.fill_diagonal(mat, 0)
         is_neg_out_diag = gs.sum(gs.array(mat) <= 0) == self.n * self.n
-        belongs = gs.logical_and(gs.logical_and(gs.logical_and(
-            gs.logical_and(is_symmetric, is_semipositive), is_rankk), is_sumtozero), is_neg_out_diag)
+        belongs = gs.logical_and(
+            gs.logical_and(
+                gs.logical_and(gs.logical_and(is_symmetric, is_semipositive), is_rankk),
+                is_sumtozero,
+            ),
+            is_neg_out_diag,
+        )
 
-        return belongs[0,0]
+        return belongs[0, 0]
 
     def projection(self, point):
         """Project a matrix to the space of PSD matrices of rank k.
@@ -245,8 +250,6 @@ class Laplacians(RankKLaplacians):
         default_coords_type="intrinsic",
     ):
         if k == n:
-            raise NotImplementedError(
-                "Carefull! It is not a laplacian matrix!"
-            )
+            raise NotImplementedError("Carefull! It is not a laplacian matrix!")
         elif n > k:
             return RankKLaplacians(n, k)

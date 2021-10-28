@@ -38,7 +38,7 @@ class RankKPSDMatrices(Manifold):
     ):
         super(Manifold, self).__init__(**kwargs)
         self.n = n
-        self.dim = (int(k*n - k * (k + 1) / 2))
+        self.dim = int(k * n - k * (k + 1) / 2)
         self.default_point_type = default_point_type
         self.default_coords_type = default_coords_type
         self.metric = metric

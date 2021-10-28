@@ -30,18 +30,22 @@ class TestLaplacianRankkMatrices(geomstats.tests.TestCase):
 
     def test_belongs(self):
         """Test of belongs method."""
-        mats = gs.array([[ 0,  0,  0,  0,  0,  0,  0],
-        [ 0,  3, -1,  0,  0, -1, -1],
-        [ 0, -1,  1,  0,  0,  0,  0],
-        [ 0,  0,  0,  3, -1, -1, -1],
-        [ 0,  0,  0, -1,  1,  0,  0],
-        [ 0, -1,  0, -1,  0,  2,  0],
-        [ 0, -1,  0, -1,  0,  0,  2]])
+        mats = gs.array(
+            [
+                [0, 0, 0, 0, 0, 0, 0],
+                [0, 3, -1, 0, 0, -1, -1],
+                [0, -1, 1, 0, 0, 0, 0],
+                [0, 0, 0, 3, -1, -1, -1],
+                [0, 0, 0, -1, 1, 0, 0],
+                [0, -1, 0, -1, 0, 2, 0],
+                [0, -1, 0, -1, 0, 0, 2],
+            ]
+        )
         result = self.space.belongs(mats)
         expected = True
         self.assertAllClose(result, expected)
 
-# ANNA Qui
+    # ANNA Qui
     def test_belongs_vectorization(self):
         """Test of belongs method."""
         mats = gs.array(
