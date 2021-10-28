@@ -14,10 +14,12 @@ from geomstats.geometry.spd_matrices import (
     SPDMetricLogEuclidean,
 )
 from geomstats.geometry.symmetric_matrices import SymmetricMatrices
+import numpy as np
+# ANNA add the function fill_diagonal to the gs
 
 
-class RankKPSDMatrices(Manifold):
-    """Class for the manifold of symmetric positive definite (PSD) matrices.
+class RankKLaplacians(Manifold):
+    """Class for the manifold of discrete laplacian matrices of a given rank k.
 
     Parameters
     ----------
@@ -25,7 +27,15 @@ class RankKPSDMatrices(Manifold):
         Integer representing the shape of the matrices: n x n.
     k: int
         Integer representing the rank of the matrix (k<n).
+
+    References
+    ----------
+    .. [GS2017] Ginestet, C. E., Li, J., Balachandran, P., Rosenberg, S., & Kolaczyk, E. D. (2017).
+     Hypothesis testing for network data in functional neuroimaging.
+     The Annals of Applied Statistics, 725-750.
     """
+
+
 
     def __init__(
         self,
@@ -44,10 +54,9 @@ class RankKPSDMatrices(Manifold):
         self.metric = metric
         self.rank = k
         self.sym = SymmetricMatrices(self.n)
-
+# ANNA - how do we create copies? on graphspace i was using copy.deepcopy()
     def belongs(self, mat, atol=gs.atol):
-        """Check if a matrix is symmetric with positive eigenvalues and
-         with n-k zero eigenvalues.
+        """Check if a matrix is a laplacian matrix
 
         Parameters
         ----------
@@ -60,16 +69,20 @@ class RankKPSDMatrices(Manifold):
         Returns
         -------
         belongs : array-like, shape=[...,]
-            Boolean denoting if mat is an SPD matrix.
+            Boolean denoting if mat is a Laplacian matrix of rank k.
         """
         is_symmetric = self.sym.belongs(mat, atol)
-        eigvalues = gs.linalg.eigvalsh(mat)
-        is_semipositive = gs.all(eigvalues > -atol, axis=-1)
+        eigval, eigvec = gs.linalg.eig(mat)
+        is_semipositive = gs.all(eigval > -atol, axis=-1)
         is_rankk = gs.linalg.matrix_rank(mat) == self.rank
-        belongs = gs.logical_and(
-            gs.logical_and(is_symmetric, is_semipositive), is_rankk
-        )
-        return belongs
+
+        is_sumtozero=mat.sum(axis=0).sum() == 0
+        np.fill_diagonal(mat,0)
+        is_neg_out_diag = gs.sum(gs.array(mat) <= 0) == self.n * self.n
+        belongs = gs.logical_and(gs.logical_and(gs.logical_and(
+            gs.logical_and(is_symmetric, is_semipositive), is_rankk), is_sumtozero), is_neg_out_diag)
+
+        return belongs[0,0]
 
     def projection(self, point):
         """Project a matrix to the space of PSD matrices of rank k.
@@ -209,7 +222,7 @@ PSDMetricLogEuclidean = SPDMetricLogEuclidean
 PSDMetricAffine = SPDMetricAffine
 
 
-class PSDMatrices(RankKPSDMatrices, SPDMatrices):
+class Laplacians(RankKLaplacians):
     r"""Class for the psd matrices. The class is recirecting to the correct embedding manifold.
     The stratum PSD rank k if the matrix is not full rank
     The top stratum SPD if the matrix is full rank
@@ -231,11 +244,9 @@ class PSDMatrices(RankKPSDMatrices, SPDMatrices):
         default_point_type="matrix",
         default_coords_type="intrinsic",
     ):
-        if k == None:
+        if k == n:
             raise NotImplementedError(
-                "PSD matrices of all ranks is not ready implemented"
+                "Carefull! It is not a laplacian matrix!"
             )
         elif n > k:
-            return RankKPSDMatrices(n, k)
-        elif n == k:
-            return SPDMatrices(n)
+            return RankKLaplacians(n, k)
