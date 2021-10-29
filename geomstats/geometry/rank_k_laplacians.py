@@ -15,6 +15,7 @@ from geomstats.geometry.spd_matrices import (
 )
 from geomstats.geometry.symmetric_matrices import SymmetricMatrices
 import numpy as np
+import copy
 
 # ANNA add the function fill_diagonal to the gs
 
@@ -55,7 +56,8 @@ class RankKLaplacians(Manifold):
         self.sym = SymmetricMatrices(self.n)
 
     # ANNA - how do we create copies? on graphspace i was using copy.deepcopy()
-    def belongs(self, mat, atol=gs.atol):
+
+    def belongs(self, point, atol=gs.atol):
         """Check if a matrix is a laplacian matrix
 
         Parameters
@@ -71,6 +73,7 @@ class RankKLaplacians(Manifold):
         belongs : array-like, shape=[...,]
             Boolean denoting if mat is a Laplacian matrix of rank k.
         """
+        mat=copy.deepcopy(point)
         is_symmetric = self.sym.belongs(mat, atol)
         eigval, eigvec = gs.linalg.eig(mat)
         is_semipositive = gs.all(eigval > -atol, axis=-1)
@@ -89,11 +92,14 @@ class RankKLaplacians(Manifold):
 
         return belongs[0, 0]
 
+    # ANNA qui rivedi projection per psd per vettori
     def projection(self, point):
-        """Project a matrix to the space of PSD matrices of rank k.
+        """Project a matrix to the space of L(n,k) matrices
 
-        First the symmetric part of point is computed, then the eigenvalues
-        are floored to zeros. To ensure rank k, n-k eigenvalues are set to 0
+        The input matrix is turned into symmetric,
+        projected onto the positive orthant to ensure positive entries
+        transformed into an adjecency matrix posing as null the diagonal values
+        and finally transformed into a Laplacian
 
         Parameters
         ----------
@@ -103,19 +109,22 @@ class RankKLaplacians(Manifold):
         Returns
         -------
         projected: array-like, shape=[..., n, n]
-            PSD matrix.
+            Laplacian matrix of rank k.
         """
 
-        sym = Matrices(self.n, self.n).to_symmetric(point)
-        eigvals, eigvecs = gs.linalg.eigh(sym)
+        to_sym = SymmetricMatrices(self.n).projection(point)
+        to_lap = [gs.eye(self.n) * i.sum(axis=0) - i - gs.eye(self.n) * i.diagonal() for i in to_sym]
+        to_lap[0 : (self.n - self.rank)] = [0] * (self.n - self.rank)
+        eigvals, eigvecs = gs.linalg.eigh(np.array(to_lap))
         regularized = gs.where(eigvals < 0, 0, eigvals)
-        regularized[0 : (self.n - self.rank)] = [0] * (self.n - self.rank)
+        regularized[:, 0: (5 - 3)] = 0
         reconstruction = gs.einsum("...ij,...j->...ij", eigvecs, regularized)
         return Matrices.mul(reconstruction, Matrices.transpose(eigvecs))
 
     def random_point(self, n_samples=1, bound=1.0):
-        """Sample in PSD(n,k) from the log-uniform distribution of SPD matrices
-        and adding zero eigenvalues.
+        """Sample in L(n,k) by sampling symmetric matrix
+        - with a uniform distribution in a box -
+        and transform it into a laplacian
 
         Parameters
         ----------
@@ -129,17 +138,18 @@ class RankKLaplacians(Manifold):
         Returns
         -------
         samples : array-like, shape=[..., n, n]
-            Points sampled in PSD(n,k).
+            Points sampled in L(n,k).
         """
-        n = self.n
-        size = (n_samples, n, n) if n_samples != 1 else (n, n)
-        mat = bound * (2 * gs.random.rand(*size) - 1)
-        spd_mat = GeneralLinear.exp(Matrices.to_symmetric(mat))
+        size = self.n
+        if n_samples != 1:
+            size = (n_samples,) + (self.n, self.n)
+        sample = gs.random.rand(*size)
+
         if n_samples > 1:
-            psd_mat = [self.projection(i) for i in spd_mat]
+            lap_mat = [self.projection(i) for i in sample]
         else:
-            psd_mat = [self.projection(spd_mat)]
-        return psd_mat
+            lap_mat = [self.projection(sample)]
+        return lap_mat
 
     # ANNA add the correct citation of Yann's work
 
