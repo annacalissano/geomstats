@@ -73,7 +73,7 @@ class RankKLaplacians(Manifold):
         belongs : array-like, shape=[...,]
             Boolean denoting if mat is a Laplacian matrix of rank k.
         """
-        mat=copy.deepcopy(point)
+        mat = copy.deepcopy(point)
         is_symmetric = self.sym.belongs(mat, atol)
         eigval, eigvec = gs.linalg.eig(mat)
         is_semipositive = gs.all(eigval > -atol, axis=-1)
@@ -113,11 +113,14 @@ class RankKLaplacians(Manifold):
         """
 
         to_sym = SymmetricMatrices(self.n).projection(point)
-        to_lap = [gs.eye(self.n) * i.sum(axis=0) - i - gs.eye(self.n) * i.diagonal() for i in to_sym]
+        to_lap = [
+            gs.eye(self.n) * i.sum(axis=0) - i - gs.eye(self.n) * i.diagonal()
+            for i in to_sym
+        ]
         to_lap[0 : (self.n - self.rank)] = [0] * (self.n - self.rank)
         eigvals, eigvecs = gs.linalg.eigh(np.array(to_lap))
         regularized = gs.where(eigvals < 0, 0, eigvals)
-        regularized[:, 0: (5 - 3)] = 0
+        regularized[:, 0 : (5 - 3)] = 0
         reconstruction = gs.einsum("...ij,...j->...ij", eigvecs, regularized)
         return Matrices.mul(reconstruction, Matrices.transpose(eigvecs))
 
