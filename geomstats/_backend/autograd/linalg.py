@@ -15,6 +15,7 @@ from autograd.numpy.linalg import (  # NOQA
     solve,
     svd,
     solve,
+    matrix_rank,
 )
 
 from .common import to_ndarray

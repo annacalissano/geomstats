@@ -53,6 +53,10 @@ def norm(x, ord=None, axis=None):
     return torch.linalg.norm(x, ord=ord, dim=axis)
 
 
+def matrix_rank(a, hermitian=False,**_unused_kwargs):
+    return torch.linalg.matrix_rank(a, hermitian)
+
+
 def solve_sylvester(a, b, q):
     if a.shape == b.shape:
         if torch.all(a == b) and torch.all(torch.abs(a - a.transpose(-2, -1)) < 1e-6):
