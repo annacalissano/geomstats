@@ -38,11 +38,9 @@ class FullRankMatrices(OpenSet):
         belongs : Boolean denoting if point is in R_*^m*n
         """
         has_right_size = self.ambient_space.belongs(point)
-        if gs.all(has_right_size):
-            rank = gs.linalg.matrix_rank(point)
-            if (rank == self.rank).all():
-                return True
-        return False
+        has_right_rank = gs.where(gs.linalg.matrix_rank(point) == self.rank, True, False)
+        belongs = gs.logical_and(has_right_rank, has_right_size)
+        return belongs
 
     def projection(self, point):
         """Project a matrix to the set of full rank matrices.
