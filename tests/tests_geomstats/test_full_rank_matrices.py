@@ -30,14 +30,11 @@ class TestFullRankMatrices(geomstats.tests.TestCase):
                 [-1.13933855, -0.64971248],
             ]
         )
-        mat_not_fr = gs.array([[1.0, 2.0], [2.0, 4.0], [6.0, 12.0]])
+        mat_not_fr = gs.array([[1.0, -1.0], [1.0, -1.0], [0.0, 0.0]])
         result = fr.belongs(mat_fr)
-        expected = True
-        self.assertAllClose(result, expected)
-
+        self.assertTrue(result)
         result = fr.belongs(mat_not_fr)
-        expected = False
-        self.assertAllClose(result, expected)
+        self.assertFalse(result)
 
     def test_projection_and_belongs(self):
         """Test of projection method."""
@@ -48,6 +45,6 @@ class TestFullRankMatrices(geomstats.tests.TestCase):
 
     def test_random_and_belongs(self):
         """Test of random point sampling method."""
-        mat = self.space.random_point()
+        mat = self.space.random_point(5)
         result = self.space.belongs(mat)
-        self.assertTrue(result)
+        self.assertTrue(gs.all(result))
