@@ -76,12 +76,13 @@ class RankKMatrices(Manifold):
         projected : array-like, shape=[..., dim_embedding]
             Projected point.
         """
+        # ANNA check if it's working. It is different from the description
         belongs = self.belongs(point)
         if not belongs:
             u, s, vh = gs.linalg.svd(point, full_matrices=False)
-            s[self.rank : min(self.shape)] = 0
-            smat = gs.eye(min(self.shape)) * s
-            return gs.dot(u, gs.dot(smat, vh))
+            s[:, self.rank : min(self.shape)] = 0
+            i = [gs.atol] * 2 + [0] * 2
+            return gs.matmul(u, (s+i)[..., None] * vh)
         else:
             return point
 
