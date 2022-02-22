@@ -151,6 +151,7 @@ class GraphSpaceMetric:
         matcher : selecting which matcher to use
             'FAQ': [Vogelstein2015]_ Fast Quadratic Assignment
             note: use Frobenius metric in background.
+            'ID': Identity matching
 
         Returns
         -------
@@ -176,8 +177,7 @@ class GraphSpaceMetric:
             self.space.permute(graph_to_permute=graph_to_permute, permutation=perm),
         )
 
-    @staticmethod
-    def faq_matching(base_graph, graph_to_permute):
+    def faq_matching(self, base_graph, graph_to_permute):
         """Fast Quadratic Assignment for graph matching.
 
         Parameters
