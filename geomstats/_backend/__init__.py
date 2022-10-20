@@ -195,6 +195,7 @@ BACKEND_ATTRIBUTES = {
         "rand",
         "randint",
         "seed",
+        "permutation",
         "uniform",
     ],
 }

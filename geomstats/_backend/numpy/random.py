@@ -2,7 +2,7 @@
 
 import numpy as _np
 from numpy.random import default_rng as _default_rng
-from numpy.random import randint, seed
+from numpy.random import permutation, randint, seed
 
 from ._dtype import _add_default_dtype_by_casting
 
