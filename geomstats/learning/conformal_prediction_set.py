@@ -5,7 +5,7 @@ Lead author: Anna Calissano.
 import geomstats.backend as gs
 
 
-class conformal_prediction_set(object):
+class ConformalPredictionSet(object):
     """Class for the Computing Conformal Prediction Sets on Metric Spaces.
 
     Implementing conformal prediction sets using conformal prediction with amplitude

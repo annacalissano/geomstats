@@ -245,6 +245,17 @@ class _BaseAligner(metaclass=ABCMeta):
 class FAQAligner(_BaseAligner):
     """Fast Quadratic Assignment for graph matching (or network alignment).
 
+    Parameters
+    ----------
+    initialization : string or array=[n_nodes, n_nodes]
+            Initialization with a doubly stochastic matrix of the FAQ parameter.
+            Default: "randomized".
+            Other common options are:
+            "barycenter" : all nodes are equally probable
+            "randomized" : random nodes initialization
+            A doubly stochastic matrix can also be imputed. For example the identity
+            matrix or a matrix reflecting a neighbouring structure.
+
     References
     ----------
     .. [Vogelstein2015] Vogelstein JT, Conroy JM, Lyzinski V, Podrazik LJ,
@@ -252,6 +263,10 @@ class FAQAligner(_BaseAligner):
         “Fast approximate quadratic programming for graph matching.“
         PLoS One. 2015 Apr 17; doi: 10.1371/journal.pone.0121002.
     """
+
+    def __init__(self, initialization="randomized"):
+        super().__init__()
+        self.initialization = initialization
 
     def align(self, metric, base_graph, graph_to_permute):
         """Align graphs.
@@ -275,7 +290,9 @@ class FAQAligner(_BaseAligner):
         )
 
         perm = [
-            gs.linalg.quadratic_assignment(x, y, options={"maximize": True})
+            gs.linalg.quadratic_assignment(
+                x, y, options={"maximize": True, "P0": self.initialization}
+            )
             for x, y in zip(base_graph, graph_to_permute)
         ]
 
